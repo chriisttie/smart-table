@@ -45,9 +45,9 @@ export function initTable(settings, onAction) {
     setTimeout(onAction);
   });
 
-  // Событие submit: срабатывает при отправке формы
+  // Событие submit: срабатывает при отправке формs
   root.container.addEventListener("submit", (evt) => {
-    evt.preventDefault(); // Предотвращаем стандартную перезагрузку страницы
+    evt.preventDefault(); // Предотвращаем стандартную перезагрузку страниц
     // Передаем кнопку/элемент, который инициировал отправку если есть
     onAction(evt.submitter);
   });
