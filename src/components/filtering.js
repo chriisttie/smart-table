@@ -1,11 +1,8 @@
-import { createComparison, defaultRules, rules } from "../lib/compare.js";
+import { createComparison, defaultRules } from "../lib/compare.js";
 
-const filteringRules = {
-  ...defaultRules,
-};
-
-// @todo: #4.3 — настроить компаратор
-const compare = createComparison(defaultRules);
+// Создаем базовый компаратор для обычных полей (дата, клиент, продавец)
+// Мы исключим поля суммы из этого компаратора, чтобы он не путался
+const baseCompare = createComparison(defaultRules);
 
 export function initFiltering(elements, indexes) {
   // @todo: #4.1 — заполнить выпадающие списки опциями
@@ -37,16 +34,37 @@ export function initFiltering(elements, indexes) {
       }
     }
 
-    if (state.totalFrom)
-      state.totalFrom = Number(state.totalFrom.replace(/\s/g, ""));
-    if (state.totalTo) state.totalTo = Number(state.totalTo.replace(/\s/g, ""));
+    // Нормализуем числа для фильтрации
+    // Преобразуем строки "5000" в числа 5000, убираем пробелы
+    const minTotal = state.totalFrom
+      ? parseFloat(String(state.totalFrom).replace(/\s/g, ""))
+      : null;
+    const maxTotal = state.totalTo
+      ? parseFloat(String(state.totalTo).replace(/\s/g, ""))
+      : null;
 
-    // @todo: #4.5 — отфильтровать данные используя компаратор
+    // Создаем объект состояния для обычного компаратора БЕЗ полей суммы
+    // Чтобы compare не пытался искать totalFrom/totalTo в данных
+    const { totalFrom, totalTo, ...restState } = state;
+
     return data.filter((row) => {
-      if (row.total && typeof row.total === "string") {
-        row.total = parseFloat(row.total.replace(/\s/g, ""));
+      // 1. Ручная проверка диапазона сумм
+      // Парсим сумму из строки данных (например, "4 657.56" -> 4657.56)
+      const rowTotal =
+        typeof row.total === "string"
+          ? parseFloat(row.total.replace(/\s/g, ""))
+          : row.total;
+
+      if (minTotal !== null && rowTotal < minTotal) {
+        return false; // Отсекаем, если меньше минимума
       }
-      return compare(row, state);
+      if (maxTotal !== null && rowTotal > maxTotal) {
+        return false; // Отсекаем, если больше максимума
+      }
+
+      // 2. Обычная фильтрация по остальным полям (дата, клиент, продавец)
+      // Используем restState, где нет totalFrom/totalTo
+      return baseCompare(row, restState);
     });
   };
 }
