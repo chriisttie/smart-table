@@ -81,7 +81,7 @@ const applyFiltering = initFiltering(sampleTable.filter.elements, {
   searchBySeller: indexes.sellers, // для элемента с именем searchBySeller устанавливаем массив продавцов
 });
 
-const applySearching = initSearching("searchField");
+const applySearching = initSearching("search");
 
 const appRoot = document.querySelector("#app");
 appRoot.appendChild(sampleTable.container);
