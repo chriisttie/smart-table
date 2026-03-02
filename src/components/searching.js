@@ -14,7 +14,7 @@ export function initSearching(searchField) {
       skipEmptyTargetValues: true,
 
       searchMultipleFields: rules.searchMultipleFields(
-        fieldName,
+        searchField,
         ["date", "customer", "seller"],
         false,
       ),
