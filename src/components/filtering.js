@@ -1,4 +1,8 @@
-import { createComparison, defaultRules } from "../lib/compare.js";
+import { createComparison, defaultRules, rules } from "../lib/compare.js";
+
+const filteringRules = {
+  ...defaultRules,
+};
 
 // @todo: #4.3 — настроить компаратор
 const compare = createComparison(defaultRules);
@@ -33,7 +37,16 @@ export function initFiltering(elements, indexes) {
       }
     }
 
+    if (state.totalFrom)
+      state.totalFrom = Number(state.totalFrom.replace(/\s/g, ""));
+    if (state.totalTo) state.totalTo = Number(state.totalTo.replace(/\s/g, ""));
+
     // @todo: #4.5 — отфильтровать данные используя компаратор
-    return data.filter((row) => compare(row, state));
+    return data.filter((row) => {
+      if (row.total && typeof row.total === "string") {
+        row.total = parseFloat(row.total.replace(/\s/g, ""));
+      }
+      return compare(row, state);
+    });
   };
 }
